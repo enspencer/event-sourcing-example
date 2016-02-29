@@ -4,20 +4,19 @@ var es = require('eventstore')({
   port: 27017,
   dbName: 'eventstore'
 });
+EventStore = function(options) {
+  this.esStore = require('eventstore')(options);
+};
 
-es.init(function(err) {
-  console.log('connection is up!!!!');
-});
+EventStore.prototype.connect = function() {
+  return new Promise(function(resolve, reject) {
+    this.esStore.init(resolve);
+    this.esStore.on('connect');
+    this.esStore.on('disconnect');
+  });
+};
 
-es.on('connect', function() {
-  console.log('storage connected');
-});
-
-es.on('disconnect', function() {
-  console.log('disconnect from storage');
-});
-
-module.exports = es;
+module.exports = EventStore;
 
 // es.getEventStream('streamId', function(err, stream) {
 //   // read from queue

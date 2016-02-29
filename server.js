@@ -19,18 +19,27 @@ if (!process.env.NODE_ENV) {
 var express = require('express'),
   _ = require('lodash'),
   config = require('./config'),
-  mongo = require('./mongo');
+  mongo = require('./mongo'),
+  EventStore = require('./eventstore');
 // port as global variable
 APP_PORT = process.env.PORT || config.get('PORT');
-
+// todo add this to the config
+EVENT_STORE_OPTIONS = {
+  type: 'mongodb',
+  host: 'localhost',
+  port: 27017,
+  dbName: 'eventstore'
+};
 // function startServer that returns a promise
 var startServer = function() {
   var app = express();
   return mongo.connect()
   .then(function() {
     app.set('port', APP_PORT);
+    var eventStore = new EventStore(EVENT_STORE_OPTIONS);
     app.server = app.listen(APP_PORT, function() {
-      require('./eventstore');
+      console.log("Application listening on port " + APP_PORT);
+      eventStore.connect();
     });
     return app;
   })
