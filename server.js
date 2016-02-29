@@ -34,19 +34,19 @@ EVENT_STORE_OPTIONS = {
 var startServer = function() {
   var app = express();
   return mongo.connect()
-  .then(function() {
-    app.set('port', APP_PORT);
-    var eventStore = new EventStore(EVENT_STORE_OPTIONS);
-    app.server = app.listen(APP_PORT, function() {
-      console.log("Application listening on port " + APP_PORT);
-      eventStore.connect();
+    .then(function() {
+      app.set('port', APP_PORT);
+      var eventStore = new EventStore(EVENT_STORE_OPTIONS);
+      app.server = app.listen(APP_PORT, function() {
+        console.log("Application listening on port " + APP_PORT);
+        eventStore.connect();
+      });
+      return app;
+    })
+    .catch(function(err) {
+      console.log(err);
+      console.log("failure");
     });
-    return app;
-  })
-  .catch(function(err) {
-    console.log(err);
-    console.log("failure");
-  });
 };
 
 module.exports = startServer();
