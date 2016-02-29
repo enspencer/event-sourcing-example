@@ -11,9 +11,11 @@ EventStore = function(options) {
 EventStore.prototype.connect = function() {
   return new Promise(function(resolve, reject) {
     this.esStore.init(resolve);
-    this.esStore.on('connect');
-    this.esStore.on('disconnect');
-  });
+    this.esStore.on('connect', function() {
+      console.log("Connected to EventStore");
+    });
+    this.esStore.on('disconnect', reject);
+  }.bind(this));
 };
 
 module.exports = EventStore;
