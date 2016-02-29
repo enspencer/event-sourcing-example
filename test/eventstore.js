@@ -3,6 +3,7 @@ process.env.NODE_ENV = 'test';
 var assert = require('assert'),
   _ = require('lodash'),
   config = require('../config'),
+  mongo = require('../mongo'),
   EventStore = require('../EventStore');
 
 var ESFakeOptions = {
@@ -21,12 +22,15 @@ describe('eventstore.js', function() {
       assert.equal(esOptions.port, ESFakeOptions.port);
       assert.equal(esOptions.host, ESFakeOptions.host);
     });
-    // it('should connect properly to the mongodb', function(done) {
-    //   eventStore = new EventStore(ESFakeOptions);
-    //   return eventStore.connect()
-    //   .then(function() {
-    //     done();
-    //   });
-    // });
+    it('should connect properly to the mongodb', function(done) {
+      eventStore = new EventStore(ESFakeOptions);
+      return mongo.connect()
+      .then(function() {
+        return eventStore.connect();
+      })
+      .then(function() {
+        done();
+      });
+    });
   });
 });

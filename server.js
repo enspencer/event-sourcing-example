@@ -39,13 +39,21 @@ var startServer = function() {
     var eventStore = new EventStore(EVENT_STORE_OPTIONS);
     app.server = app.listen(APP_PORT, function() {
       console.log("Application listening on port " + APP_PORT);
-      eventStore.connect();
     });
-    return app;
+    return eventStore.connect()
+    .then(function() {
+      return app;
+    })
+    .catch(function(err) {
+      console.log(err);
+      console.log("Something went wrong! EventStore failed to connect!")
+      process.exit(1)
+    });
   })
   .catch(function(err) {
     console.log(err);
-    console.log("failure");
+    console.log("Something went wrong! MongoDB failed to connect!");
+    process.exit(1);
   });
 };
 
