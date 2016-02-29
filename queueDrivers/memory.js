@@ -21,7 +21,7 @@ MemoryQueueDriver.prototype.write = function(body) {
 
     this.queue.push(message);
     resolve(msgId);
-  });
+  }.bind(this));
 };
 
 MemoryQueueDriver.prototype.read = function() {
@@ -40,9 +40,12 @@ MemoryQueueDriver.prototype.read = function() {
     msg.visibilityTimeout = this.defaultVisibility;
 
     this.hidden.push(msg);
-  });
+    resolve(returned);
+  }.bind(this));
 };
 
 // MemoryQueueDriver.prototype.checkVisibility = function() {
 
 // };
+//
+module.exports = MemoryQueueDriver;
