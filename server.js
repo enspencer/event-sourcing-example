@@ -8,38 +8,45 @@
  * 6) Global error handling
  * 7) Start the server
  *
- * @returns promise<Express App>
+ * @returns Promise<Express App>
  */
 
+// set the node environment
 if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = 'default';
 }
-
-var express = require('express');
-var _ = require('lodash');
-var Q = require('q');
-var config = require('./config');
-port = process.env.PORT || config.get('PORT');
-
-var app = express();
-
-try {
-  require('./mongo').connect()
-    .then(function() {
-      app.set('port', port);
-
-      app.server = app.listen(port, function() {
-        console.log('Express server listening on port %d', port);
-
-        // Hook up the event store to mongo
-        require('./eventstore');
-      });
-
+// node requirements
+var express = require('express'),
+  _ = require('lodash'),
+  config = require('./config'),
+  mongo = require('./mongo'),
+  EventStore = require('./eventstore');
+// port as global variable
+APP_PORT = process.env.PORT || config.get('PORT');
+// todo add this to the config
+EVENT_STORE_OPTIONS = {
+  type: 'mongodb',
+  host: 'localhost',
+  port: 27017,
+  dbName: 'eventstore'
+};
+// function startServer that returns a promise
+var startServer = function() {
+  var app = express();
+  return mongo.connect()
+  .then(function() {
+    app.set('port', APP_PORT);
+    var eventStore = new EventStore(EVENT_STORE_OPTIONS);
+    app.server = app.listen(APP_PORT, function() {
+      console.log("Application listening on port " + APP_PORT);
+      eventStore.connect();
     });
+    return app;
+  })
+  .catch(function(err) {
+    console.log(err);
+    console.log("failure");
+  });
+};
 
-} catch (err) {
-  console.log('Mongo failed to connect: %s', err.message);
-  console.log(err.stack);
-}
-
-module.exports = app;
+module.exports = startServer();
