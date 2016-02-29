@@ -1,7 +1,7 @@
-var _ = require('lodash');
-var fs = require('fs');
-var filename = process.env.NODE_ENV;
-var config = require('./config/' + filename);
+var _ = require('lodash'),
+  fs = require('fs'),
+  filename = process.env.NODE_ENV,
+  config = require('./config/' + filename);
 
 module.exports = {
   get: function(key) {
@@ -10,5 +10,8 @@ module.exports = {
     } else {
       return config[key];
     }
+  },
+  set: function(key, value) {
+    config[key] = value;
   }
 };

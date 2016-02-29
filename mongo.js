@@ -1,31 +1,22 @@
 var config = require('./config');
-var Q = require('q');
-var mongoose = require('mongoose-q')(require('mongoose'));
+var mongoose = require('mongoose');
 
 if (process.env.NODE_ENV === 'default' || process.env.NODE_ENV === 'testing') {
   mongoose.set('debug', true);
 }
 
-module.exports = {
-  connect: function() {
-    var deferred = Q.defer();
-    console.log(config.get('MONGO_URL_EVENTSTORE'));
-    var connection = mongoose.createConnection(config.get('MONGO_URL_EVENTSTORE'));
-
-    connection.on('error', function(error) {
-      deferred.reject('Error connecting to mongo %s', error);
-    });
-
-    connection.on('connected', function() {
-      console.log('Successfully connected to database');
-      deferred.resolve();
-    });
-
-    connection.on('close', function() {
-      deferred.reject('Mongo connection closed');
-    });
-
-    return deferred.promise;
-  }
-
+var connect = function() {
+  // return Promise to be resolved upon connection, or rejected on
+  // error or close
+  return new Promise(function(resolve, reject) {
+    // grab the mongo event store URL
+    var eventStoreMongoURL = config.get('MONGO_URL_EVENTSTORE');
+    // instantiate a new connection and listen for connection, error, or close
+    var eventStoreConnection = mongoose.createConnection(eventStoreMongoURL);
+    eventStoreConnection.on('error', reject);
+    eventStoreConnection.on('connected', resolve);
+    eventStoreConnection.on('close', reject);
+  });
 };
+
+module.exports = {connect: connect};
